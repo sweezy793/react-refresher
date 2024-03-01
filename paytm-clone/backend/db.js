@@ -29,6 +29,18 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+const accountSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId, // Reference to User model
+    ref: "Users",
+    required: true,
+  },
+  balance: {
+    type: Number,
+    required: true,
+  },
+});
+
 userSchema.methods.createHash = async (password) => {
   const saltRounds = 10;
   const salt = await bcrypt.genSalt(saltRounds);
@@ -40,7 +52,9 @@ userSchema.methods.validatePassword = async function (enteredPassword) {
 };
 
 const User = mongoose.model("Users", userSchema);
+const Account = mongoose.model("Account", accountSchema);
 
 module.exports = {
   User,
+  Account,
 };

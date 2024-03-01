@@ -1,10 +1,10 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const router = express.Router();
-const { User } = require("../db");
+const { User, Account } = require("../db");
 const JWT_SECRET = require("../config");
+const authMiddleware = require("../middleware");
 
 router.post("/signup", async (req, res) => {
   const existingUser = await User.findOne({ username: req.body.username });
@@ -22,6 +22,12 @@ router.post("/signup", async (req, res) => {
   user.password = hashedPass;
 
   await user.save();
+
+  const initialBalance = Math.floor(Math.random() * 9999) + 1;
+  await Account.create({
+    userId: user._id,
+    balance: initialBalance,
+  });
 
   const token = jwt.sign({ userId: user._id }, JWT_SECRET);
 
@@ -51,6 +57,37 @@ router.post("/signin", async (req, res) => {
   } else {
     return res.status(411).json({
       message: "Wrong password",
+    });
+  }
+});
+
+router.put("/", authMiddleware, async (req, res) => {
+  await User.updateOne({ _id: req.userId }, req.body);
+
+  res.json({
+    message: "Updated successfully",
+  });
+});
+
+router.get("/bulk", async (req, res) => {
+  const searchTerm = req.query.filter;
+
+  try {
+    const userData = await User.find({
+      $or: [
+        { firstName: new RegExp(searchTerm, "i") },
+        { lastName: new RegExp(searchTerm, "i") },
+      ],
+    })
+      .select("username firstName lastName _id")
+      .exec();
+
+    return res.status(200).json({
+      users: userData,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
     });
   }
 });
