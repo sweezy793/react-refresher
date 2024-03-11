@@ -14,6 +14,7 @@ const Questions = () => {
   const [page, setPage] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
   const [selectedOption, setSelectedOption] = useState<null | string>(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,27 +50,32 @@ const Questions = () => {
   };
 
   const submitBtnHandler = () => {
-    console.log("Final Score " + finalScore + "/" + allQuestions.length);
+    navigate("/result", {
+      state: { finalScore, totalScore: allQuestions.length },
+    });
   };
 
   const SingleQuestionComponent = () => {
     const ques = allQuestions[page];
     const options = [...ques.incorrectAnswers, ques?.correctAnswer];
     return (
-      <div>
-        <p>{ques?.question?.text}</p>
-        <div>
+      <div className="flex flex-col gap-6">
+        <p className="font-medium text-4xl">{ques?.question?.text}</p>
+        <div className="grid grid-cols-2">
           {options.map((item) => {
             return (
-              <label>
-                <input
-                  type="radio"
-                  value={item}
-                  checked={selectedOption == item}
-                  onChange={(e) => answerValidateHandler(e)}
-                />
-                {item}
-              </label>
+              <div className="p-2">
+                <label className="text-xl">
+                  <input
+                    type="radio"
+                    value={item}
+                    checked={selectedOption == item}
+                    onChange={(e) => answerValidateHandler(e)}
+                    className="mr-2"
+                  />
+                  {item}
+                </label>
+              </div>
             );
           })}
         </div>
@@ -78,30 +84,34 @@ const Questions = () => {
   };
 
   return (
-    <div className="flex justify-center">
-      <div className="flex-col">
-        {allQuestions[page] && <SingleQuestionComponent />}
-        <div>
-          <div className="flex justify-between">
+    <div className="flex justify-center bg-stone-300 h-screen">
+      <div className="flex flex-col justify-center w-[50rem]">
+        <div className="flex flex-col bg-slate-50 rounded-xl text-center p-4 h-max drop-shadow-xl justify-between gap-10">
+          {allQuestions[page] && <SingleQuestionComponent />}
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between">
+              <button
+                className="p-2 bg-black text-white rounded-lg w-32 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-70"
+                onClick={prevBtnHandler}
+                disabled={page === 0}
+              >
+                Previous
+              </button>
+              <button
+                className="p-2 bg-black text-white rounded-lg w-32 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-70"
+                onClick={nextBtnHandler}
+                disabled={page === allQuestions.length - 1}
+              >
+                Next
+              </button>
+            </div>
             <button
-              className="p-2 bg-black text-white rounded-lg"
-              onClick={nextBtnHandler}
+              className="p-2 bg-black text-white rounded-lg w-full hover:opacity-70"
+              onClick={submitBtnHandler}
             >
-              Next
-            </button>
-            <button
-              className="p-2 bg-black text-white rounded-lg"
-              onClick={prevBtnHandler}
-            >
-              Previous
+              Submit
             </button>
           </div>
-          <button
-            className="p-2 bg-black text-white rounded-lg w-full"
-            onClick={submitBtnHandler}
-          >
-            Submit
-          </button>
         </div>
       </div>
     </div>

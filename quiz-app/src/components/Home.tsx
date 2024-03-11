@@ -11,6 +11,7 @@ const Home = () => {
       alert("Please enter all fields");
       return;
     }
+    localStorage.setItem("name", name);
     navigate("/questions");
   };
   return (
